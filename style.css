@@ -1,0 +1,45 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #111;
+  color: #f5f5f5;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+#note-display {
+  text-align: center;
+  user-select: none;
+}
+
+#note {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+#octave {
+  margin-top: 0.3rem;
+  font-size: 1.4rem;
+  opacity: 0.8;
+}
+
