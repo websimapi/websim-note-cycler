@@ -10,9 +10,18 @@ for (const octave of octaves) {
 }
 
 let index = 0;
-let audioCtx = null;
+
+// Preload audio for each note+octave pair
+const noteAudioMap = {};
+for (const { note, octave } of sequence) {
+  const key = `${note}${octave}`;
+  if (!noteAudioMap[key]) {
+    noteAudioMap[key] = new Audio(`./${key}.mp3`);
+  }
+}
 
 // Map note+octave to frequency (equal temperament, A4 = 440 Hz)
+// (kept in case you want to go back to synthesized tones later)
 function getFrequency(note, octave) {
   const semitonesFromA4 = {
     C: -9,
@@ -29,30 +38,18 @@ function getFrequency(note, octave) {
 }
 
 function playCurrentNote() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  } else if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-
   const { note, octave } = sequence[index];
-  const freq = getFrequency(note, octave);
+  const key = `${note}${octave}`;
+  const baseAudio = noteAudioMap[key];
 
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
+  if (!baseAudio) return;
 
-  osc.type = "sine";
-  osc.frequency.value = freq;
-
-  gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.4);
+  // Clone so rapid taps can overlap without cutting off previous notes
+  const audio = baseAudio.cloneNode(true);
+  audio.currentTime = 0;
+  audio.play().catch(() => {
+    // Ignore play errors (e.g. if browser blocks before user gesture)
+  });
 }
 
 function updateDisplay() {
